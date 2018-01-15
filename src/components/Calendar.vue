@@ -28,8 +28,33 @@
   /* eslint-disable no-console */
   import moment from 'moment';
 
-
+  // For Test
   window.moment = moment;
+
+  class DateItem {
+    constructor(date, state) {
+      this.date = date;
+      this.status = state || 'NORMAL';
+      this.disabled = false;
+      this.selected = false;
+      this.isRange = false;
+    }
+
+    get state() {
+      return this.status;
+    }
+    set state(_status) {
+      this.status = _status;
+    }
+    get viewDate() {
+      return this.date.format('DD');
+    }
+
+    setSelected(_selected) {
+      this.selected = _selected;
+    }
+  }
+
   class DateItemCollection {
     constructor(vm) {
       this.itemList = [];
@@ -57,34 +82,31 @@
 
       const diff = end.diff(start, 'day');
       let i = 0;
-      const _itemList = [];
+      const itemList = [];
       const spliceItemList = [];
       const testList = [];
 
       for (i = 0; i < diff; i += 1) {
-        testList.push(moment(start).add(i , 'day').format('YYYY-MM-DD'));
-        _itemList.push(new DateItem(moment(start).add(i , 'day')));
+        testList.push(moment(start).add(i, 'day').format('YYYY-MM-DD'));
+        itemList.push(new DateItem(moment(start).add(i, 'day')));
       }
 
       const weekday = start.day();
       for (i = weekday; i >= 1; i -= 1) {
-        _itemList.unshift(new DateItem(moment(start).add(-i, 'day')));
+        itemList.unshift(new DateItem(moment(start).add(-i, 'day')));
       }
 
 
       const endWeekday = end.day();
       for (i = 1; i <= 6 - endWeekday; i += 1) {
-        _itemList.push(new DateItem(moment(end).add(i, 'day')));
+        itemList.push(new DateItem(moment(end).add(i, 'day')));
       }
-
 
       const diffWeek = diff / 7;
 
       for (i = 0; i < diffWeek; i += 1) {
-        spliceItemList.push(_itemList.splice(0, 7));
+        spliceItemList.push(itemList.splice(0, 7));
       }
-
-      console.log(testList);
 
       this.itemList = spliceItemList;
       this.updateWeekVisible();
@@ -95,10 +117,12 @@
       let i = 0;
       const pivotToMoment = moment(this.pivotDate);
       const pivotStartDate = pivotToMoment.startOf('month');
-      const pivotEndDate = moment(this.pivotDate).add(this.range, 'month').endOf('month')
+      const pivotEndDate = moment(this.pivotDate).add(this.range, 'month').endOf('month');
+      let item;
       for (i = 0; i < weekCount; i += 1) {
-        const startDayVisible = this.itemList[i][0].date.isBetween(pivotStartDate, pivotEndDate);
-        const endDayVisible = this.itemList[i][this.itemList[i].length - 1].date.isBetween(pivotStartDate, pivotEndDate);
+        item = this.itemList[i];
+        const startDayVisible = item[0].date.isBetween(pivotStartDate, pivotEndDate);
+        const endDayVisible = item[item.length - 1].date.isBetween(pivotStartDate, pivotEndDate);
         this.weekVisibleList[i] = (startDayVisible || endDayVisible);
       }
       this.vm.$forceUpdate();
@@ -114,26 +138,6 @@
 
     setCalendarRange(range) {
       this.range = range - 1;
-    }
-  }
-
-  class DateItem {
-    constructor(date, state) {
-      this.date = date;
-      this.status = state || 'NORMAL';
-      this.disabled = false;
-      this.selected = false;
-      this.isRange = false;
-    }
-
-    get state() {
-      return this.status;
-    }
-    set state(_status) {
-      this.status = _status;
-    }
-    get viewDate() {
-      return this.date.format('DD');
     }
   }
 
@@ -160,27 +164,8 @@
       },
     },
     methods: {
-      createDateListItem() {
-
-      },
       drawCalendar() {
-        const lastDate = this.getLastDate();
-        const startDate = this.getStartDate();
-        const prevDates = this.getPrevDate(this.getStartDate());
-        const nextDates = this.getNextDate(this.getLastDate());
-        const dayArray = [];
-        let i = 0;
-        const startDateToInt = parseInt(startDate.format('DD'), 10);
-        const lastDateToInt = parseInt(lastDate.format('DD'), 10);
 
-        for (i = startDateToInt - 1; i < lastDateToInt; i += 1) {
-          console.log(startDate.format('YYYYMMDD'));
-          dayArray.push(new DateItem(moment(startDate).add(i, 'day')));
-        }
-
-        this.dateList.prev = prevDates;
-        this.dateList.next = nextDates;
-        const result = [].concat(prevDates, dayArray, nextDates);
       },
       cleanCalendar() {
         this.dateList.prev = [];
@@ -231,7 +216,7 @@
         this.dateItemCollection.updateWeekVisible();
       },
       selectDate(dateItem) {
-        dateItem.selected = !dateItem.selected;
+        dateItem.setSelected(!dateItem.selected);
       },
     },
     mounted() {
