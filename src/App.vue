@@ -1,16 +1,19 @@
 <template>
   <div id="app">
     <HelloWorld/>
+    <Calendar />
   </div>
 </template>
 
 <script>
 import HelloWorld from './components/HelloWorld';
+import Calendar from './components/Calendar';
 
 export default {
   name: 'app',
   components: {
     HelloWorld,
+    Calendar,
   },
 };
 </script>
